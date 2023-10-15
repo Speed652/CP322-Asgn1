@@ -51,3 +51,26 @@ class KNearestNeighbor:
             predictions.append(max(set(k_nearest_labels), key=k_nearest_labels.count))
 
         return np.array(predictions)
+
+def clean_data(data):
+    # Remove examples with missing or malformed features
+    clean_data = []
+    for example in data:
+        if not any([val is None or isinstance(val, str) and val.strip() == '' for val in example]):
+            clean_data.append(example)
+
+    clean_data = np.array(clean_data)
+
+    # Handle one-hot encoding for categorical variables
+    categorical_indices = [1]  # Assuming the second column is categorical
+
+    for idx in categorical_indices:
+        unique_values = np.unique(clean_data[:, idx])
+        for val in unique_values:
+            one_hot_encoded = (clean_data[:, idx] == val).astype(np.int)
+            clean_data = np.hstack((clean_data, one_hot_encoded.reshape(-1, 1)))
+
+    # Remove the original categorical column after one-hot encoding
+    clean_data = np.delete(clean_data, categorical_indices, axis=1)
+
+    return clean_data
